@@ -7,7 +7,7 @@ use failure::Error;
 
 use crate::count::Counter;
 use crate::count::WordCountOffset;
-use crate::io::{ChunkError, ChunkFile};
+use crate::io::{ChunkError, ChunkFile, DEFAULT_CHUNK_SIZE};
 use crate::merge::MergeCounter;
 
 mod count;
@@ -26,7 +26,7 @@ struct Count {
 
 impl Count {
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Count, Error> {
-        let io = ChunkFile::new(path)?;
+        let io = ChunkFile::new(path, DEFAULT_CHUNK_SIZE)?;
 
         let counter = Counter::new();
 

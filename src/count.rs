@@ -59,3 +59,40 @@ impl Counter {
         Ok(file)
     }
 }
+
+
+#[cfg(test)]
+mod test {
+    use super::{Counter, WordCountOffset};
+
+    #[test]
+    fn test_count() {
+        let mut counter = Counter::new();
+
+        assert_eq!(1, counter.count("abcd".into(), 0));
+
+        assert_eq!(2, counter.count("abcd".into(), 5));
+
+        assert_eq!(1, counter.count("qwer".into(), 10));
+
+        assert_eq!(2, counter.count("qwer".into(), 15));
+    }
+
+    #[test]
+    fn test_flush() {
+        let mut counter = Counter::new();
+        counter.count("qwer".into(), 0);
+        counter.count("qwer".into(), 5);
+
+        counter.count("zxcv".into(), 10);
+        counter.count("zxcv".into(), 15);
+
+        let mut file = counter.flush().unwrap();
+
+        let wco = bincode::deserialize_from(&mut file).unwrap();
+        assert_eq!(WordCountOffset("qwer".into(), 2, 0), wco);
+
+        let wco = bincode::deserialize_from(&mut file).unwrap();
+        assert_eq!(WordCountOffset("zxcv".into(), 2, 10), wco);
+    }
+}

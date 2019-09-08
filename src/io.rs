@@ -6,7 +6,7 @@ use std::io::prelude::*;
 
 use std::path::Path;
 
-const CHUNK_SIZE: u64 = 1024 * 1024 * 1024;
+pub const DEFAULT_CHUNK_SIZE: u64 = 1024 * 1024 * 1024;
 
 pub struct ChunkFile {
     file: File,
@@ -21,6 +21,7 @@ pub struct ChunkFile {
 
     chunk_size: usize,
     chunk: Vec<u8>,
+    chunk_cap: u64,
 }
 
 #[derive(Fail, Debug)]
@@ -35,8 +36,13 @@ pub enum ChunkError {
 }
 
 impl ChunkFile {
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
+    pub fn new<P: AsRef<Path>>(path: P, chunk_size: u64) -> Result<Self, Error> {
         let file = File::open(path)?;
+
+        ChunkFile::from_file(file, chunk_size)
+    }
+
+    pub fn from_file(file: File, chunk_size: u64) -> Result<Self, Error> {
         let meta = file.metadata().unwrap();
 
         let mut chunk_file = ChunkFile {
@@ -47,7 +53,8 @@ impl ChunkFile {
             is_end: false,
             file_size: meta.len(),
             load_size: 0,
-            chunk: vec![0u8; CHUNK_SIZE as usize],
+            chunk: vec![0u8; chunk_size as usize],
+            chunk_cap: chunk_size
         };
 
         chunk_file.init()?;
@@ -95,7 +102,7 @@ impl ChunkFile {
     /// try read next line, with offset in origin file
     fn next_line(&mut self) -> Result<(Vec<u8>, u64), ChunkError> {
         let mut word = Vec::new();
-        let offset = (self.load_size / CHUNK_SIZE) * CHUNK_SIZE + self.chunk_pos as u64;
+        let offset = (self.load_size / self.chunk_cap) * self.chunk_cap + self.chunk_pos as u64;
 
         for &byte in self.chunk[self.chunk_pos..self.chunk_size].iter() {
             word.push(byte);
@@ -143,5 +150,29 @@ impl ChunkFile {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{ChunkFile, DEFAULT_CHUNK_SIZE};
+    use std::io::{Write, Seek, SeekFrom};
+
+    #[test]
+    fn test_word() {
+        let mut tmp = tempfile::tempfile().unwrap();
+        tmp.write("qwer\n".as_bytes()).unwrap();
+        tmp.write("abcd\n".as_bytes()).unwrap();
+        tmp.write("zxcv\n".as_bytes()).unwrap();
+
+        tmp.seek(SeekFrom::Start(0)).unwrap();
+
+        let mut chunk_file = ChunkFile::from_file(tmp, DEFAULT_CHUNK_SIZE).unwrap();
+
+        assert_eq!(chunk_file.next_word().unwrap(), ("qwer".to_owned(), 0u64));
+
+        assert_eq!(chunk_file.next_word().unwrap(), ("abcd".to_owned(), 5u64));
+
+        assert_eq!(chunk_file.next_word().unwrap(), ("zxcv".to_owned(), 10u64));
     }
 }

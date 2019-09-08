@@ -84,3 +84,21 @@ impl MergeCounter {
         self.ans.clone()
     }
 }
+
+
+#[cfg(test)]
+mod test {
+    use crate::merge::MergeCounter;
+
+    #[test]
+    fn test() {
+        let mut merger = MergeCounter::new().unwrap();
+
+        merger.count("a".into(), 1, 0);
+        merger.count("b".into(), 1, 2);
+        merger.count("c".into(), 1, 4);
+        merger.count("a".into(), 1, 6);
+
+        assert_eq!(merger.get_ans(), Some(("a".into(), 0)));
+    }
+}
