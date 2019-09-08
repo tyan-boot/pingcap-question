@@ -54,7 +54,7 @@ impl ChunkFile {
             file_size: meta.len(),
             load_size: 0,
             chunk: vec![0u8; chunk_size as usize],
-            chunk_cap: chunk_size
+            chunk_cap: chunk_size,
         };
 
         chunk_file.init()?;
@@ -87,7 +87,7 @@ impl ChunkFile {
         } else {
             self.file.read(&mut self.chunk)
         }
-            .map_err(|_| ChunkError::IoError)?;
+        .map_err(|_| ChunkError::IoError)?;
 
         self.load_size += size as u64;
         self.chunk_size = size;
@@ -137,7 +137,7 @@ impl ChunkFile {
             let last = word.last().unwrap();
 
             if *last == b'\n' {
-                word.pop().unwrap();    // trim
+                word.pop().unwrap(); // trim
                 return Ok((String::from_utf8(word).unwrap(), offset));
             } else {
                 // the file may not end with newline, thus this is the last line
@@ -156,7 +156,7 @@ impl ChunkFile {
 #[cfg(test)]
 mod test {
     use super::{ChunkFile, DEFAULT_CHUNK_SIZE};
-    use std::io::{Write, Seek, SeekFrom};
+    use std::io::{Seek, SeekFrom, Write};
 
     #[test]
     fn test_word() {

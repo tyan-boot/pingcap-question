@@ -2,7 +2,6 @@ use failure::Error;
 
 use crate::count::WordCountOffset;
 
-
 /// MergeCounter works like reduce
 pub struct MergeCounter {
     inner: Vec<WordCountOffset>,
@@ -84,7 +83,6 @@ impl MergeCounter {
         self.ans.clone()
     }
 }
-
 
 #[cfg(test)]
 mod test {

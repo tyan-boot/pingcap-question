@@ -60,7 +60,6 @@ impl Counter {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::{Counter, WordCountOffset};
