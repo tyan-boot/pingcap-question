@@ -90,7 +90,7 @@ impl Count {
 
         loop {
             // sort files using first line
-            queue.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
+            queue.sort_by(|lhs, rhs| rhs.0.cmp(&lhs.0));
 
             let next = queue.pop();
 

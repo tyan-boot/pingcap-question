@@ -55,6 +55,8 @@ impl Counter {
         let mut file = writer.into_inner()?;
         // reset seek to begin in case for further read
         file.seek(SeekFrom::Start(0))?;
+        // clear state
+        self.inner.clear();
 
         Ok(file)
     }
