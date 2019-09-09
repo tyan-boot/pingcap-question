@@ -1,6 +1,6 @@
 use failure::Error;
 
-use crate::count::WordCountOffset;
+use super::count::WordCountOffset;
 
 /// MergeCounter works like reduce
 pub struct MergeCounter {
@@ -86,7 +86,7 @@ impl MergeCounter {
 
 #[cfg(test)]
 mod test {
-    use crate::merge::MergeCounter;
+    use super::super::merge::MergeCounter;
 
     #[test]
     fn test() {
